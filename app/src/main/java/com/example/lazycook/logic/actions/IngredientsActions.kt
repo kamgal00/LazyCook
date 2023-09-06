@@ -1,15 +1,14 @@
 package com.example.lazycook.logic.actions
 
+import android.net.Uri
 import com.example.lazycook.logic.dataclasses.Amount
 import com.example.lazycook.logic.dataclasses.AmountList
-import com.example.lazycook.logic.dataclasses.AmountList.Companion.asAmountList
 import com.example.lazycook.logic.dataclasses.Ingredient
 import com.example.lazycook.logic.dataclasses.IngredientList
 import com.example.lazycook.logic.dataclasses.Recipe
 import com.example.lazycook.logic.dataclasses.TextFieldReturnVal
 import com.example.lazycook.logic.dataclasses.Tag
 import com.example.lazycook.logic.dataclasses.TagList
-import com.example.lazycook.logic.dataclasses.TitleAndDescription
 import com.example.lazycook.logic.ActionWithContinuation
 import com.example.lazycook.logic.GuiElement
 import com.example.lazycook.logic.apis.ProgramContext
@@ -19,10 +18,7 @@ import com.example.lazycook.logic.apis.whileCallCC
 import com.example.lazycook.logic.callCC
 import com.example.lazycook.logic.ret
 import com.example.lazycook.logic.returnables.Create
-import com.example.lazycook.logic.returnables.Delete
 import com.example.lazycook.logic.returnables.Done
-import com.example.lazycook.logic.returnables.PhotoGallery
-import com.example.lazycook.logic.returnables.PhotoTake
 
 data class IngredientPicker(
     val searchText: String,
@@ -30,7 +26,7 @@ data class IngredientPicker(
     val visibleIngredients: IngredientList,
 ) : GuiElement
 
-private fun <T> ExitContext.acceptIngredient(
+fun <T> ExitContext.acceptIngredient(
     searchText: String = "",
     startingTags: TagList = TagList(emptyList()),
     showAddButton: Boolean = false,
@@ -45,7 +41,7 @@ private fun <T> ExitContext.acceptIngredient(
             val emptyRecipe =
                 Recipe(
                     0,
-                    null,
+                    Uri.EMPTY,
                     "New recipe",
                     null,
                     AmountList(emptyList()),
@@ -178,109 +174,4 @@ fun ProgramContext.getIngredients(
         }
     }
 
-data class FullInfoRecipe(
-    val recipe: Recipe,
-    val ingredientList: IngredientList,
-    val tagList: TagList
-) : GuiElement
-
-fun ExitContext.fetchFullRecipe(recipe: Recipe): ActionWithContinuation<FullInfoRecipe> =
-    databaseInteractions.getRelatedIngredients(recipe.asIdWithType()) databaseThen { ingredientList ->
-        databaseInteractions.getRelatedTags(recipe.asIdWithType()) databaseThen { tagList ->
-            ret(FullInfoRecipe(recipe, ingredientList, tagList))
-        }
-    }
-
-fun ProgramContext.showRecipe(recipe: Recipe): ActionWithContinuation<Unit> =
-    whileCallCC(recipe) { recipe, loopScope ->
-        fetchFullRecipe(recipe) then { fullInfoRecipe ->
-            userInteractions.show(
-                fullInfoRecipe,
-                additionalOperations = listOf(Pair("Delete", Delete(recipe)))
-            ) checkCases {
-                select(PhotoGallery) {
-                    ret(recipe) // TODO
-                }
-                select(PhotoTake) {
-                    ret(recipe) // TODO
-                }
-                edit(TitleAndDescription::class) {
-                    defaultCallCC(recipe) {
-                        getNewTitleAndDescription(it) then {
-                            databaseInteractions.edit(
-                                recipe.copy(
-                                    name = it.title,
-                                    description = it.description
-                                )
-                            ) databaseThen { ret(it) }
-                        }
-                    }
-                }
-                create(AmountList::class) {
-                    defaultCallCC(recipe) {
-                        getNewAmount() then {
-                            databaseInteractions.edit(recipe.copy(measures = AmountList(recipe.measures.listElements + it).normalize()))
-                        } databaseThen {
-                            ret(it)
-                        }
-                    }
-                }
-                edit(Amount::class) { oldAmount ->
-                    defaultCallCC(recipe) {
-                        editOrDeleteAmount(oldAmount) then { newAmount ->
-                            val measuresMap = recipe.measures.asMap()
-                            val newAmountList =
-                                (if (newAmount == null) (measuresMap - oldAmount.unit)
-                                else (measuresMap + Pair(
-                                    newAmount.unit,
-                                    newAmount.amount
-                                ))).asAmountList()
-                            ret(newAmountList)
-                        } then {
-                            databaseInteractions.edit(recipe.copy(measures = it.normalize()))
-                        } databaseThen {
-                            ret(it)
-                        }
-                    }
-                }
-                edit(TagList::class) {
-                    defaultCallCC(recipe) {
-                        chooseTags(it) then {
-                            databaseInteractions.saveRelatedTags(recipe.asIdWithType(), it)
-                        } databaseThen {
-                            ret(recipe)
-                        }
-                    }
-                }
-                edit(IngredientList::class) {
-                    defaultCallCC(recipe) {
-                        getIngredients(selected = it) then {
-                            databaseInteractions.saveRelatedIngredients(recipe.asIdWithType(), it)
-                        } databaseThen {
-                            ret(recipe)
-                        }
-                    }
-                }
-                select(Ingredient::class) {
-                    showRecipe(it.recipe) then { ret(recipe) }
-                }
-                delete {
-                    defaultCallCC(recipe) {
-                        databaseInteractions.delete(recipe) databaseThen { loopScope.exit(recipe) }
-                    }
-                }
-            }
-        }
-    } then { ret(Unit) }
-
-fun ProgramContext.showAllRecipes(): ActionWithContinuation<Unit> =
-    defaultCallCC(Unit) { acceptIngredient(showAddButton = true) { showRecipe(it.recipe) } }
-
-
-fun ExitContext.getNewTitleAndDescription(old: TitleAndDescription): ActionWithContinuation<TitleAndDescription> =
-    userInteractions.show(old) checkCases {
-        edit(TitleAndDescription::class) {
-            ret(it)
-        }
-    }
 

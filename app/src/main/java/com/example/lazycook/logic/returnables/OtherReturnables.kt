@@ -1,6 +1,7 @@
 package com.example.lazycook.logic.returnables
 
+import android.net.Uri
 import com.example.lazycook.logic.ReturnValue
 
-object PhotoGallery: ReturnValue
+data class PhotoGallery(val uri: Uri?): ReturnValue
 object PhotoTake: ReturnValue

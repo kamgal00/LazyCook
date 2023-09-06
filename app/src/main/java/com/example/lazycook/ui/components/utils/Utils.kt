@@ -1,5 +1,6 @@
 package com.example.lazycook.ui.components.utils
 
+import android.net.Uri
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -56,7 +57,7 @@ fun Operation<ImageVector>.AsIconButton(modifier: Modifier = Modifier) =
     }
 
 @Composable
-fun String?.AsAsyncImage(modifier: Modifier = Modifier) =
+fun Uri.AsAsyncImage(modifier: Modifier = Modifier) =
     AsyncImage(
         model = this,
         contentDescription = null,

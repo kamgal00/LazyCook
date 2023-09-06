@@ -14,7 +14,7 @@ import com.example.lazycook.logic.dataclasses.Recipe
 @Entity()
 data class RoomRecipe(
     @PrimaryKey(autoGenerate = true) val id: Int,
-    val photo: String?,
+    val photo: String,
     val name: String,
     val description: String?,
     val measures: AmountList,

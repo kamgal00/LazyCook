@@ -1,5 +1,6 @@
 package com.example.lazycook.ui.components.utils
 
+import android.net.Uri
 import com.example.lazycook.logic.dataclasses.Amount
 import com.example.lazycook.logic.dataclasses.AmountList
 import com.example.lazycook.logic.dataclasses.Ingredient
@@ -11,7 +12,7 @@ object SampleRecipe {
             Ingredient(
                 Recipe(
                     id = (it + 10),
-                    photo = "https://www.pastelowelove.pl/userdata/public/gfx/5582/kotek-mruczek--naklejka.-naklejka-dla-dzieci.-dekoracje-pokoju.jpg",
+                    photo = Uri.parse("https://www.pastelowelove.pl/userdata/public/gfx/5582/kotek-mruczek--naklejka.-naklejka-dla-dzieci.-dekoracje-pokoju.jpg"),
                     name = "piesek nr $it",
                     description = null,
                     measures = AmountList(listOf(
@@ -23,7 +24,7 @@ object SampleRecipe {
         })
     val cat = Recipe(
         id = 1,
-        photo = "https://www.pastelowelove.pl/userdata/public/gfx/5582/kotek-mruczek--naklejka.-naklejka-dla-dzieci.-dekoracje-pokoju.jpg",
+        photo = Uri.parse("https://www.pastelowelove.pl/userdata/public/gfx/5582/kotek-mruczek--naklejka.-naklejka-dla-dzieci.-dekoracje-pokoju.jpg"),
         name = "kotek",
         description = (0 until 100).joinToString { "1984" },
         measures = AmountList(listOf(

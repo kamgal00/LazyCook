@@ -1,11 +1,11 @@
 package com.example.lazycook.logic.dataclasses
 
+import android.net.Uri
 import com.example.lazycook.logic.DataObject
-import com.example.lazycook.logic.ReturnValue
 
 data class Recipe(
     val id: Int,
-    val photo: String?,
+    val photo: Uri,
     val name: String,
     val description: String?,
     val measures: AmountList,

@@ -1,8 +1,11 @@
 package com.example.lazycook.ui.components.views
 
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -31,9 +34,6 @@ import com.example.lazycook.logic.dataclasses.TagList
 import com.example.lazycook.logic.dataclasses.TitleAndDescription
 import com.example.lazycook.logic.actions.TagSelector
 import com.example.lazycook.logic.returnables.Edit
-import com.example.lazycook.logic.returnables.PhotoGallery
-import com.example.lazycook.logic.returnables.PhotoTake
-import com.example.lazycook.logic.returnables.Select
 import com.example.lazycook.ui.ActionConsumer
 import com.example.lazycook.ui.components.utils.AsAsyncImage
 import com.example.lazycook.ui.components.utils.AsIconButton
@@ -44,7 +44,6 @@ import com.example.lazycook.ui.components.widgets.IngredientListWidget
 import com.example.lazycook.ui.components.widgets.ShowMeasures
 import com.example.lazycook.ui.components.widgets.TagSelectionView
 import com.example.lazycook.ui.createOperation
-import com.example.lazycook.ui.div
 import com.example.lazycook.ui.editOperation
 
 @Preview(showBackground = true)
@@ -56,17 +55,19 @@ fun RecipeViewPreview() {
             SampleRecipe.SampleIngredientList,
             SampleTag.SampleTagList
         ),
-        actionConsumer = {}
+        actionConsumer = {},
+        pickMedia = ComponentActivity().registerForActivityResult(ActivityResultContracts.PickVisualMedia()) {}
     )
 }
 
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RecipeView(
     fullInfoRecipe: FullInfoRecipe,
     actionConsumer: ActionConsumer,
+    pickMedia: ActivityResultLauncher<PickVisualMediaRequest>
 ) {
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -80,19 +81,21 @@ fun RecipeView(
                     .width(IntrinsicSize.Min)
             ) {
 
-                fullInfoRecipe.recipe.photo.AsAsyncImage(Modifier.size(130.dp))
+                fullInfoRecipe.recipe.photo.AsAsyncImage(Modifier.size(130.dp)) //TODO: restore
+//                SampleRecipe.cat.photo.AsAsyncImage(Modifier.size(130.dp))
 
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Operation(
-                        Icons.Default.PhotoAlbum,
-                        actionConsumer / Select(PhotoGallery)
-                    ).AsIconButton(
+                        Icons.Default.PhotoAlbum
+                    ) {
+                        pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    }.AsIconButton(
                         Modifier.weight(1f)
                     )
                     Operation(
-                        Icons.Default.PhotoCamera,
-                        actionConsumer / Select(PhotoTake)
-                    ).AsIconButton(
+                        Icons.Default.PhotoCamera
+                    ) {
+                    }.AsIconButton(
                         Modifier.weight(1f)
                     )
                 }

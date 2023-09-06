@@ -1,5 +1,7 @@
 package com.example.lazycook.ui
 
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
@@ -8,10 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.example.lazycook.logic.dataclasses.AmountList
 import com.example.lazycook.logic.dataclasses.IngredientList
-import com.example.lazycook.logic.dataclasses.Meal
 import com.example.lazycook.logic.dataclasses.MealTime
-import com.example.lazycook.logic.dataclasses.Recipe
-import com.example.lazycook.logic.dataclasses.ShoppingList
 import com.example.lazycook.logic.dataclasses.TitleAndDescription
 import com.example.lazycook.logic.GuiElement
 import com.example.lazycook.logic.actions.AllTagsElement
@@ -44,6 +43,7 @@ import com.example.lazycook.ui.components.widgets.TitleAndDescriptionEditor
 fun DrawGuiElement(
     element: GuiElement?,
     onAction: ActionConsumer,
+    pickMedia: ActivityResultLauncher<PickVisualMediaRequest>,
     modifier: Modifier = Modifier
 ) {
     when (element) {
@@ -87,7 +87,7 @@ fun DrawGuiElement(
             description = "Ingredients"
         )
 
-        is FullInfoRecipe -> RecipeView(fullInfoRecipe = element, actionConsumer = onAction)
+        is FullInfoRecipe -> RecipeView(fullInfoRecipe = element, actionConsumer = onAction, pickMedia = pickMedia)
         else -> Box(modifier = Modifier.fillMaxSize()) {
             Text(text = "Nothing here...", modifier = Modifier.align(Alignment.Center))
         }

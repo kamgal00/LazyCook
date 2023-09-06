@@ -1,7 +1,9 @@
 package com.example.lazycook.ui
 
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +16,6 @@ import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -23,7 +24,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -38,13 +38,13 @@ import com.example.lazycook.logic.returnables.Navigate
 import com.example.lazycook.logic.returnables.NavigationDestination
 import com.example.lazycook.logic.returnables.RecipesScreen
 import com.example.lazycook.ui.components.utils.AsButton
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import com.example.lazycook.logic.returnables.PhotoGallery
 import com.example.lazycook.logic.returnables.SafeGuiCallResult
+import com.example.lazycook.logic.returnables.Select
 import com.example.lazycook.logic.returnables.ShoppingListsScreen
 import com.example.lazycook.logic.returnables.TagsScreen
 
@@ -52,7 +52,7 @@ typealias ActionConsumer = (GuiCallResult) -> Unit
 
 operator fun ActionConsumer.div(r: GuiCallResult): () -> Unit = { this(r) }
 
-class JetpackUserInterface : UserInteractions {
+class JetpackUserInterface(componentActivity: ComponentActivity) : UserInteractions {
 
     private val currentGuiElement: MutableState<GuiElement?> = mutableStateOf(null)
     private val currentActionConsumer: MutableState<ActionConsumer> = mutableStateOf({})
@@ -90,8 +90,14 @@ class JetpackUserInterface : UserInteractions {
         it(Unit)
     }
 
+
+    private val pickMedia =
+        componentActivity.registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            currentActionConsumer.value(Select(PhotoGallery(uri)))
+        }
+
     @Composable
-    fun draw() {
+    fun MainScreen() {
         val currGui by remember { currentGuiElement }
         val actionConsumer by remember { currentActionConsumer }
         val description by remember { additionalDesc }
@@ -131,10 +137,12 @@ class JetpackUserInterface : UserInteractions {
                                     imageVector = Icons.Default.Fastfood,
                                     contentDescription = null
                                 )
+
                                 ShoppingListsScreen -> Icon(
                                     imageVector = Icons.Default.List,
                                     contentDescription = null
                                 )
+
                                 TagsScreen -> Icon(
                                     imageVector = Icons.Default.Tag,
                                     contentDescription = null
@@ -168,7 +176,7 @@ class JetpackUserInterface : UserInteractions {
                         .fillMaxWidth()
                         .weight(1f)
                 ) {
-                    DrawGuiElement(currGui, actionConsumer)
+                    DrawGuiElement(currGui, actionConsumer, pickMedia)
                 }
                 Column(
                     modifier = Modifier
@@ -191,5 +199,5 @@ class JetpackUserInterface : UserInteractions {
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    JetpackUserInterface().draw()
+    JetpackUserInterface(ComponentActivity()).MainScreen()
 }
