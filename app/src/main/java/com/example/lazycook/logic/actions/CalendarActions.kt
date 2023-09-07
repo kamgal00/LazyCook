@@ -8,7 +8,6 @@ import com.example.lazycook.logic.dataclasses.TagList
 import com.example.lazycook.logic.ActionWithContinuation
 import com.example.lazycook.logic.GuiElement
 import com.example.lazycook.logic.ReturnValue
-import com.example.lazycook.logic.Thrower
 import com.example.lazycook.logic.apis.ProgramContext
 import com.example.lazycook.logic.apis.ExitContext
 import com.example.lazycook.logic.apis.defaultCallCC
@@ -34,14 +33,6 @@ data class DateRangeSelector(
 ) : GuiElement
 
 data class CalendarSlot(val date: MealDate, val mealTime: MealTime) : ReturnValue
-
-data class MealCreationContext(
-    val programContext: ProgramContext,
-    val selectedSlot: CalendarSlot,
-    val currentDate: MealDate,
-    val mealTimes: List<MealTime>,
-    val thrower: Thrower<Unit>
-)
 
 fun ProgramContext.showCalendar(): ActionWithContinuation<Unit> =
     whileCallCC(Unit) { _, _ ->
@@ -83,7 +74,14 @@ fun ProgramContext.showCalendar(): ActionWithContinuation<Unit> =
                                 ret(CalendarSlot(MealDate(it), calendarSlot.mealTime))
                             }
                         } then { endCalendarSlot ->
-                            getIngredient(startingTags = TagList(startCalendarSlot.mealTime.relatedTag.putInList())) then { ingredient ->
+                            getIngredient(
+                                startingTags = TagList(startCalendarSlot.mealTime.relatedTag.putInList()),
+                                defaultAmountProducer = getDefaultMeasuresProducerForMeal(
+                                    startCalendarSlot.date,
+                                    endCalendarSlot.date,
+                                    startCalendarSlot.mealTime
+                                )
+                            ) then { ingredient ->
                                 databaseInteractions.add(
                                     Meal(
                                         0,
@@ -121,3 +119,4 @@ fun ExitContext.getCalendarSlot(
             else emptyAction()
         }
     }
+

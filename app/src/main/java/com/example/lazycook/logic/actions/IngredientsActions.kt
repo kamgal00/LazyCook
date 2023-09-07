@@ -16,6 +16,7 @@ import com.example.lazycook.logic.apis.ExitContext
 import com.example.lazycook.logic.apis.defaultCallCC
 import com.example.lazycook.logic.apis.whileCallCC
 import com.example.lazycook.logic.callCC
+import com.example.lazycook.logic.dataclasses.AmountList.Companion.asAmountList
 import com.example.lazycook.logic.ret
 import com.example.lazycook.logic.returnables.Create
 import com.example.lazycook.logic.returnables.Done
@@ -45,8 +46,6 @@ fun <T> ExitContext.acceptIngredient(
                     "New recipe",
                     null,
                     AmountList(emptyList()),
-//                    IngredientList(emptyList()),
-//                    TagList(emptyList())
                 )
             databaseInteractions.findAllRecipesSatisfying(
                 context.searchText,
@@ -79,11 +78,9 @@ fun <T> ExitContext.acceptIngredient(
                 }
                 create(Recipe::class) {
                     defaultCallCC(context) {
-                        databaseInteractions.add(
-                            emptyRecipe.copy(measures = AmountList(listOf(Amount("g", 100.0))))
-                        ) databaseThen {
-                            showRecipe(it)
-                        } then { ret(context) }
+                        databaseInteractions.add(emptyRecipe) databaseThen { showRecipe(it) } then {
+                            ret(context)
+                        }
                     }
                 }
             }
@@ -92,10 +89,15 @@ fun <T> ExitContext.acceptIngredient(
 
 fun ExitContext.getIngredient(
     searchText: String = "",
-    startingTags: TagList = TagList(emptyList())
+    startingTags: TagList = TagList(emptyList()),
+    defaultAmountProducer: ((Recipe) -> AmountList)?
 ): ActionWithContinuation<Ingredient> = callCC { ingredientContext ->
     acceptIngredient(searchText, startingTags) { ingredient ->
-        chooseAmount(ingredient.recipe.measures, null) then {
+        chooseAmount(
+            defaultAmountProducer?.let { it(ingredient.recipe) }
+                ?: (ingredient.recipe.measures.asMap() + ("unit" to 1.0)).asAmountList(),
+            null
+        ) then {
             if (it == null) ret(Unit)
             else ingredientContext.exit(ingredient.copy(amount = it))
         }
@@ -106,7 +108,8 @@ fun ExitContext.getIngredient(
 fun ProgramContext.getIngredients(
     searchText: String = "",
     startingTags: TagList = TagList(emptyList()),
-    selected: IngredientList = IngredientList(emptyList())
+    selected: IngredientList = IngredientList(emptyList()),
+    defaultAmountProducer: ((Recipe) -> AmountList)?
 ): ActionWithContinuation<IngredientList> =
     defaultCallCC(selected) {
         tagListToTagSelector(startingTags) then { tagSelector ->
@@ -149,7 +152,11 @@ fun ProgramContext.getIngredients(
                     }
                     select(Ingredient::class) { ingredient ->
                         defaultCallCC(context) {
-                            chooseAmount(ingredient.recipe.measures, ingredient.amount) then {
+                            chooseAmount(
+                                defaultAmountProducer?.let { it(ingredient.recipe) }
+                                    ?: (ingredient.recipe.measures.asMap() + ("unit" to 1.0)).asAmountList(),
+                                ingredient.amount
+                            ) then {
                                 val chosenWithoutCurrent =
                                     context.selected.elements.filter { it.recipe.id != ingredient.recipe.id }
                                 ret(

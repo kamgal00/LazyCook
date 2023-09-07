@@ -69,13 +69,13 @@ fun AmountUtilsPreview() {
         }
         Box(Modifier.weight(1f)) {
             ChooseAmountView(
-                selector = AmountSelector(listOf("units", "kcal", "g"), Amount("kcal", 1000.0)),
+                selector = AmountSelector(mapOf("units" to 1.0, "kcal" to 2.0, "g" to 3.0), Amount("kcal", 1000.0)),
                 actionConsumer = {}
             )
         }
         Box(Modifier.weight(1f)) {
             ChooseAmountView(
-                selector = AmountSelector(listOf("units", "kcal", "g"), null),
+                selector = AmountSelector(mapOf("units" to 1.0, "kcal" to 2.0, "g" to 3.0), null),
                 actionConsumer = {}
             )
         }
@@ -153,15 +153,18 @@ fun ChooseAmountView(
 ) {
 
     var expanded by remember { mutableStateOf(false) }
+    val keys = selector.possibleMeasures.keys.toList()
     var selectedIndex by remember {
         mutableIntStateOf(selector.previousAmount?.let {
-            selector.possibleMeasures.indexOf(
+            keys.indexOf(
                 it.unit
             ).let { max(it, 0) }
-        } ?: selector.possibleMeasures.indexOf("unit"))
+        } ?: keys.indexOf("unit"))
     }
     var amountText by remember {
-        mutableStateOf(selector.previousAmount?.amount.let { it?.toString() ?: "1" })
+        mutableStateOf(selector.previousAmount?.amount.let {
+            it?.toString() ?: selector.possibleMeasures[keys[selectedIndex]].toString()
+        })
     }
     if (selector.possibleMeasures.isEmpty()) actionConsumer(
         ExceptionGuiResult(
@@ -186,7 +189,7 @@ fun ChooseAmountView(
                             },
                         ) {
                             TextField(
-                                value = selector.possibleMeasures[selectedIndex],
+                                value = keys[selectedIndex],
                                 onValueChange = {},
                                 readOnly = true,
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -197,11 +200,12 @@ fun ChooseAmountView(
                                 expanded = expanded,
                                 onDismissRequest = { expanded = false }
                             ) {
-                                selector.possibleMeasures.forEach { item ->
+                                keys.forEach { item ->
                                     DropdownMenuItem(
                                         text = { Text(text = item) },
                                         onClick = {
-                                            selectedIndex = selector.possibleMeasures.indexOf(item)
+                                            selectedIndex = keys.indexOf(item)
+                                            amountText = selector.possibleMeasures[keys[selectedIndex]].toString()
                                             expanded = false
                                         }
                                     )
@@ -223,7 +227,7 @@ fun ChooseAmountView(
                                 ExceptionGuiResult(IllegalArgumentException("Entered amount is not a positive integer"))
                             )
                             else actionConsumer(
-                                Select(Amount(selector.possibleMeasures[selectedIndex], it))
+                                Select(Amount(keys[selectedIndex], it))
                             )
                         }
                     }, modifier = Modifier.fillMaxWidth()) {
@@ -236,7 +240,7 @@ fun ChooseAmountView(
                                 ExceptionGuiResult(IllegalArgumentException("Entered amount is not a positive integer"))
                             )
                             else actionConsumer(
-                                Select(Amount(selector.possibleMeasures[selectedIndex], it))
+                                Select(Amount(keys[selectedIndex], it))
                             )
                         }
                     }, modifier = Modifier.fillMaxWidth()) {

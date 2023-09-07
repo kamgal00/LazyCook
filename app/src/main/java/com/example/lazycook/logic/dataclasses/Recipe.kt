@@ -18,16 +18,13 @@ data class Amount(val unit: String, val amount: Double) : DataObject
 data class AmountList(val listElements: List<Amount>): DataObject
      {
     fun asMap(): Map<String, Double> =
-        listElements.groupBy({ it.unit }, { it.amount }).mapValues { it.value.first() } + Pair(
-            "unit",
-            1.0
-        )
+        listElements.groupBy({ it.unit }, { it.amount }).mapValues { it.value.first() }
 
     fun normalize(): AmountList = asMap().asAmountList()
 
     companion object {
         fun Map<String, Double>.asAmountList() =
-            AmountList((this - "unit").toList().map { Amount(it.first, it.second) })
+            AmountList((this).toList().map { Amount(it.first, it.second) })
     }
 }
 

@@ -100,7 +100,7 @@ fun ProgramContext.showRecipe(recipe: Recipe): ActionWithContinuation<Unit> =
                 }
                 edit(IngredientList::class) {
                     defaultCallCC(recipe) {
-                        getIngredients(selected = it) then {
+                        getIngredients(selected = it, defaultAmountProducer = null) then {
                             databaseInteractions.saveRelatedIngredients(recipe.asIdWithType(), it)
                         } databaseThen {
                             ret(recipe)

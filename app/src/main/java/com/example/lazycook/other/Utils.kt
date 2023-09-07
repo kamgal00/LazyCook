@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 fun <T> T?.putInList(): List<T> = if (this != null) listOf(this) else emptyList()
 
@@ -21,3 +22,5 @@ fun Calendar.addDays(amount: Int): Calendar = this.apply { add(Calendar.DATE, am
 fun Int.formatAsHour(): String = "${this / 60}:${
     (this % 60).toString().padStart(2, '0')
 }"
+
+infix fun Date.daysUntil(other: Date): Int = (other.time - time).let { TimeUnit.DAYS.convert(it, TimeUnit.MILLISECONDS).toInt() }

@@ -9,7 +9,13 @@ import com.example.lazycook.logic.apis.ExitContext
 import com.example.lazycook.logic.apis.ProgramContext
 import com.example.lazycook.logic.apis.defaultCallCC
 import com.example.lazycook.logic.apis.whileCallCC
+import com.example.lazycook.logic.dataclasses.AmountList
+import com.example.lazycook.logic.dataclasses.AmountList.Companion.asAmountList
+import com.example.lazycook.logic.dataclasses.MealDate
+import com.example.lazycook.logic.dataclasses.MealTime
+import com.example.lazycook.logic.dataclasses.Recipe
 import com.example.lazycook.logic.ret
+import com.example.lazycook.other.daysUntil
 import com.example.lazycook.other.putInList
 
 data class FullInfoMeal(
@@ -18,7 +24,14 @@ data class FullInfoMeal(
 ) : GuiElement
 
 fun ExitContext.fetchFullMeal(meal: Meal): ActionWithContinuation<FullInfoMeal> =
-    databaseInteractions.getRelatedIngredients(meal.asIdWithType()) databaseThen { ret(FullInfoMeal(meal, it)) }
+    databaseInteractions.getRelatedIngredients(meal.asIdWithType()) databaseThen {
+        ret(
+            FullInfoMeal(
+                meal,
+                it
+            )
+        )
+    }
 
 fun ProgramContext.showMeal(meal: Meal): ActionWithContinuation<Unit> =
     whileCallCC(meal) { meal, loopScope ->
@@ -29,7 +42,12 @@ fun ProgramContext.showMeal(meal: Meal): ActionWithContinuation<Unit> =
                         getIngredients(
                             "",
                             TagList(meal.mealTime.relatedTag.putInList()),
-                            fullMeal.ingredientList
+                            fullMeal.ingredientList,
+                            defaultAmountProducer = getDefaultMeasuresProducerForMeal(
+                                meal.startDate,
+                                meal.endDate,
+                                meal.mealTime
+                            )
                         ) then {
                             databaseInteractions.saveRelatedIngredients(meal.asIdWithType(), it)
                         } databaseThen { ret(meal) }
@@ -43,3 +61,20 @@ fun ProgramContext.showMeal(meal: Meal): ActionWithContinuation<Unit> =
             }
         }
     } then { ret(Unit) }
+
+fun getDefaultMeasuresProducerForMeal(
+    startDate: MealDate,
+    endDate: MealDate,
+    mealTime: MealTime
+): (Recipe) -> AmountList = {
+    val duration =
+        startDate.date daysUntil endDate.date
+    (it.measures.asMap() + ("unit" to 1.0))
+        .mapValues { it.value * duration }
+        .let { map ->
+            if (mealTime.calories != null && it.measures.asMap().containsKey("kcal")) {
+                map + ("kcal" to (mealTime.calories * duration).toDouble())
+            } else map
+        }
+        .asAmountList()
+}

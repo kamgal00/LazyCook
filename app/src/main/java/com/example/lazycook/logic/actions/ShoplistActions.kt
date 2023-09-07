@@ -85,8 +85,11 @@ fun ProgramContext.showShoppingList(shoppingList: ShoppingList): ActionWithConti
                 }
                 edit(IngredientList::class) {
                     defaultCallCC(shoppingList) {
-                        getIngredients(selected = it) then {
-                            databaseInteractions.saveRelatedIngredients(shoppingList.asIdWithType(), it)
+                        getIngredients(selected = it, defaultAmountProducer = null) then {
+                            databaseInteractions.saveRelatedIngredients(
+                                shoppingList.asIdWithType(),
+                                it
+                            )
                         } databaseThen { ret(shoppingList) }
                     }
                 }

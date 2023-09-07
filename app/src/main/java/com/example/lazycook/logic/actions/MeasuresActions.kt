@@ -30,7 +30,7 @@ fun ExitContext.editOrDeleteAmount(amount: Amount): ActionWithContinuation<Amoun
     }
 
 data class AmountSelector(
-    val possibleMeasures: List<String>,
+    val possibleMeasures: Map<String, Double>,
     val previousAmount: Amount?
 ) : GuiElement
 
@@ -41,7 +41,7 @@ fun ExitContext.chooseAmount(
 ): ActionWithContinuation<Amount?> =
     userInteractions.show(
         AmountSelector(
-            possibleAmounts.asMap().keys.toList(),
+            possibleAmounts.asMap(),
             previousAmount
         )
     ) checkCases {
