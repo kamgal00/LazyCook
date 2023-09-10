@@ -85,6 +85,10 @@ object DummyDatabaseInteractions : DatabaseInteractions {
     override fun getRelatedIngredients(obj: IdWithType): DatabaseAction<IngredientList> =
         ret(DataBaseCallResult(SampleRecipe.SampleIngredientList))
 
+    override fun getRelatedIngredientsSync(obj: IdWithType): IngredientList {
+        TODO("Not yet implemented")
+    }
+
     override fun getRelatedTags(obj: IdWithType): DatabaseAction<TagList> =
         ret(DataBaseCallResult(SampleTag.SampleTagList))
 

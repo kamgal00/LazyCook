@@ -134,6 +134,7 @@ class RoomDatabaseInterface(appContext: Context) : DatabaseInteractions {
             is ShoppingList -> DataBaseCallResult(
                 db.shoppingListDao().deleteShoppingListWithIngredients(obj)
             )
+
             is TagList -> DataBaseCallResult(
                 db.tagDao().deleteTags(*obj.elements.toTypedArray())
             )
@@ -144,12 +145,12 @@ class RoomDatabaseInterface(appContext: Context) : DatabaseInteractions {
     )
 
     override fun getRelatedIngredients(obj: IdWithType): DatabaseAction<IngredientList> =
-        ret(
-            DataBaseCallResult(
-                db.ingredientDao().getIngredientsOf(obj.id, obj.type)
-                    .map { Ingredient(it.recipe, Amount(it.ingredient.unit, it.ingredient.amount)) }
-                    .let { IngredientList(it) })
-        )
+        ret(DataBaseCallResult(getRelatedIngredientsSync(obj)))
+
+    override fun getRelatedIngredientsSync(obj: IdWithType): IngredientList =
+        db.ingredientDao().getIngredientsOf(obj.id, obj.type)
+            .map { Ingredient(it.recipe, Amount(it.ingredient.unit, it.ingredient.amount)) }
+            .let { IngredientList(it) }
 
     override fun getRelatedTags(obj: IdWithType): DatabaseAction<TagList> =
         ret(

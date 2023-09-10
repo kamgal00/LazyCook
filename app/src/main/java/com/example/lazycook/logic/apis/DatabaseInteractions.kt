@@ -14,6 +14,7 @@ interface DatabaseInteractions {
     fun <T : DataObject> edit(obj: T): DatabaseAction<T>
     fun <T : DataObject> delete(obj: T): DatabaseAction<Unit>
     fun getRelatedIngredients(obj: IdWithType): DatabaseAction<IngredientList>
+    fun getRelatedIngredientsSync(obj: IdWithType): IngredientList
     fun getRelatedTags(obj: IdWithType): DatabaseAction<TagList>
     fun saveRelatedIngredients(obj: IdWithType, ing: IngredientList): DatabaseAction<IngredientList>
     fun saveRelatedTags(obj: IdWithType, tags: TagList): DatabaseAction<TagList>

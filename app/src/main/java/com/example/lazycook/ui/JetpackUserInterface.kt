@@ -3,6 +3,8 @@ package com.example.lazycook.ui
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -52,7 +54,17 @@ typealias ActionConsumer = (GuiCallResult) -> Unit
 
 operator fun ActionConsumer.div(r: GuiCallResult): () -> Unit = { this(r) }
 
-class JetpackUserInterface(componentActivity: ComponentActivity) : UserInteractions {
+class JetpackUserInterface : UserInteractions {
+
+
+    private var pickMedia: ActivityResultLauncher<PickVisualMediaRequest>? = null
+
+    fun updateComponentActivity(componentActivity: ComponentActivity) {
+        pickMedia =
+            componentActivity.registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+                currentActionConsumer.value(Select(PhotoGallery(uri)))
+            }
+    }
 
     private val currentGuiElement: MutableState<GuiElement?> = mutableStateOf(null)
     private val currentActionConsumer: MutableState<ActionConsumer> = mutableStateOf({})
@@ -90,11 +102,6 @@ class JetpackUserInterface(componentActivity: ComponentActivity) : UserInteracti
         it(Unit)
     }
 
-
-    private val pickMedia =
-        componentActivity.registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            currentActionConsumer.value(Select(PhotoGallery(uri)))
-        }
 
     @Composable
     fun MainScreen() {
@@ -176,7 +183,12 @@ class JetpackUserInterface(componentActivity: ComponentActivity) : UserInteracti
                         .fillMaxWidth()
                         .weight(1f)
                 ) {
-                    DrawGuiElement(currGui, actionConsumer, pickMedia)
+                    DrawGuiElement(
+                        currGui,
+                        actionConsumer,
+                        pickMedia ?: ComponentActivity().registerForActivityResult(
+                            ActivityResultContracts.PickVisualMedia()
+                        ) {})
                 }
                 Column(
                     modifier = Modifier
@@ -199,5 +211,5 @@ class JetpackUserInterface(componentActivity: ComponentActivity) : UserInteracti
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    JetpackUserInterface(ComponentActivity()).MainScreen()
+    JetpackUserInterface().MainScreen()
 }

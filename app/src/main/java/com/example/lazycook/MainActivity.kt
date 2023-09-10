@@ -12,17 +12,16 @@ import com.example.lazycook.room.RoomDatabaseInterface
 import com.example.lazycook.ui.JetpackUserInterface
 
 import android.Manifest
+import androidx.activity.viewModels
 
 private const val MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123
 
 class MainActivity : ComponentActivity() {
+
+    private val androidViewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val jui = JetpackUserInterface(this)
-        val apis = Apis(
-            userInteractions = jui,
-            databaseInteractions = RoomDatabaseInterface(applicationContext)
-        )
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED
@@ -34,9 +33,9 @@ class MainActivity : ComponentActivity() {
             )
         }
 
+        androidViewModel.updateComponentActivity(this)
         setContent {
-            jui.MainScreen()
+            androidViewModel.DrawMainScreen()
         }
-        apis.mainLoop().run { finish() }
     }
 }
