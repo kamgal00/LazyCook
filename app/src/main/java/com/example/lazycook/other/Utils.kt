@@ -23,4 +23,12 @@ fun Int.formatAsHour(): String = "${this / 60}:${
     (this % 60).toString().padStart(2, '0')
 }"
 
-infix fun Date.daysUntil(other: Date): Int = (other.time - time).let { TimeUnit.DAYS.convert(it, TimeUnit.MILLISECONDS).toInt() }
+infix fun Date.daysUntil(other: Date): Int =
+    (other.time - time).let { TimeUnit.DAYS.convert(it, TimeUnit.MILLISECONDS).toInt() }
+
+fun <K, V> mergeMaps(vararg maps: Map<K, V>, combiner: (K, V, V) -> V = { _, x, _ -> x }) =
+    maps.flatMap { it.entries }.groupBy { it.key }
+        .mapValues { recipeToOldEntry ->
+            recipeToOldEntry.value.map { it.value }
+                .reduce { x, y -> combiner(recipeToOldEntry.key, x, y) }
+        }

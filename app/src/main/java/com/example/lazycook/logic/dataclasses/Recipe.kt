@@ -2,6 +2,7 @@ package com.example.lazycook.logic.dataclasses
 
 import android.net.Uri
 import com.example.lazycook.logic.DataObject
+import com.example.lazycook.logic.algorithms.toIngredientList
 
 data class Recipe(
     val id: Int,
@@ -36,6 +37,8 @@ data class IngredientList(override val elements: List<Ingredient>) :
         other.elements.associateBy { it.recipe.id }.let { ingMap ->
             IngredientList(elements.map { it.copy(amount = ingMap[it.recipe.id]?.amount) })
         }
+    fun asMap(): Map<Recipe, Amount> = elements.groupBy { it.recipe }.mapValues { it.value.first().amount!! }
+    operator fun plus(other: IngredientList): IngredientList = listOf(asMap(),other.asMap()).toIngredientList()
 }
 
 

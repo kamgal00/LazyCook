@@ -97,13 +97,13 @@ fun MealView(
                 actions = listOf(editOperation(fullMeal.ingredientList, actionConsumer))
             )
         }
-        Column {
-            Button(
-                onClick = { actionConsumer(Delete(fullMeal.meal)) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "Delete")
-            }
-        }
+//        Column {
+//            Button(
+//                onClick = { actionConsumer(Delete(fullMeal.meal)) },
+//                modifier = Modifier.fillMaxWidth()
+//            ) {
+//                Text(text = "Delete")
+//            }
+//        }
     }
 }

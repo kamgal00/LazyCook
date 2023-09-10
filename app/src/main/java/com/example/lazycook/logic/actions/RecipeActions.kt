@@ -3,6 +3,7 @@ package com.example.lazycook.logic.actions
 import android.net.Uri
 import com.example.lazycook.logic.ActionWithContinuation
 import com.example.lazycook.logic.GuiElement
+import com.example.lazycook.logic.algorithms.asMultiplierWithRespectTo
 import com.example.lazycook.logic.apis.ExitContext
 import com.example.lazycook.logic.apis.ProgramContext
 import com.example.lazycook.logic.apis.defaultCallCC
@@ -19,6 +20,7 @@ import com.example.lazycook.logic.ret
 import com.example.lazycook.logic.returnables.Delete
 import com.example.lazycook.logic.returnables.PhotoGallery
 import com.example.lazycook.logic.returnables.PhotoTake
+import com.example.lazycook.logic.returnables.Select
 
 data class FullInfoRecipe(
     val recipe: Recipe,
@@ -38,12 +40,15 @@ fun ProgramContext.showRecipe(recipe: Recipe): ActionWithContinuation<Unit> =
         fetchFullRecipe(recipe) then { fullInfoRecipe ->
             userInteractions.show(
                 fullInfoRecipe,
-                additionalOperations = listOf(Pair("Delete", Delete(recipe)))
+                additionalOperations = listOf(
+                    "Delete" to Delete(recipe),
+                    "Add to shopping list" to Select(recipe)
+                )
             ) checkCases {
                 select(PhotoGallery::class) {
                     defaultCallCC(recipe) {
                         databaseInteractions.edit(
-                            recipe.copy(photo = it.uri ?: Uri.EMPTY)
+                            recipe.copy(photo = it.uri ?: recipe.photo)
                         ) databaseThen { ret(it) }
                     }
                 }
@@ -113,6 +118,21 @@ fun ProgramContext.showRecipe(recipe: Recipe): ActionWithContinuation<Unit> =
                 delete {
                     defaultCallCC(recipe) {
                         databaseInteractions.delete(recipe) databaseThen { loopScope.exit(recipe) }
+                    }
+                }
+                select(Recipe::class) {
+                    defaultCallCC(recipe) {
+                        chooseAmount(
+                            (recipe.measures.asMap() + ("unit" to 1.0)).asAmountList(),
+                            previousAmount = null
+                        ) then {
+                            addBasicIngredientsToSelectedShoppingList(
+                                recipe,
+                                multiplier = it!!
+                            ) then {
+                                ret(recipe)
+                            }
+                        }
                     }
                 }
             }

@@ -5,6 +5,7 @@ import com.example.lazycook.logic.dataclasses.AmountList
 import com.example.lazycook.logic.ActionWithContinuation
 import com.example.lazycook.logic.GuiElement
 import com.example.lazycook.logic.apis.ExitContext
+import com.example.lazycook.logic.emptyAction
 import com.example.lazycook.logic.ret
 
 data class AmountEditor(
