@@ -2,6 +2,7 @@ package com.example.lazycook.room
 
 import android.content.Context
 import android.icu.util.Measure
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -46,7 +47,12 @@ import kotlin.reflect.KClass
         RoomShoppingList::class,
         RoomIngredient::class,
         RoomTagElement::class
-    ], version = 1
+    ],
+    version = 2,
+    autoMigrations = [
+        AutoMigration (from = 1, to = 2)
+    ],
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {

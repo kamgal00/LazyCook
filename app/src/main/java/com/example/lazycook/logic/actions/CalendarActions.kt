@@ -88,6 +88,7 @@ fun ProgramContext.showCalendar(): ActionWithContinuation<Unit> =
                                         startCalendarSlot.date,
                                         endCalendarSlot.date,
                                         startCalendarSlot.mealTime,
+                                        ingredient.recipe.photo
                                     )
                                 ) databaseThen { meal ->
                                     databaseInteractions.saveRelatedIngredients(

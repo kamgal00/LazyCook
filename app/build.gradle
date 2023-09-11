@@ -46,6 +46,9 @@ android {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
+    ksp {
+        arg(new RoomSchemaArgProvider(new File(projectDir, "schemas")))
+    }
 }
 
 dependencies {
@@ -84,4 +87,22 @@ dependencies {
 //    kapt "androidx.room:room-compiler:$room_version"
     // To use Kotlin Symbol Processing (KSP)
     ksp "androidx.room:room-compiler:$room_version"
+}
+
+class RoomSchemaArgProvider implements CommandLineArgumentProvider {
+
+    @InputDirectory
+    @PathSensitive(PathSensitivity.RELATIVE)
+    File schemaDir
+
+    RoomSchemaArgProvider(File schemaDir) {
+        this.schemaDir = schemaDir
+    }
+
+    @Override
+    Iterable<String> asArguments() {
+        // Note: If you're using KSP, change the line below to return
+        // ["room.schemaLocation=${schemaDir.path}".toString()].
+        return ["room.schemaLocation=${schemaDir.path}".toString()]
+    }
 }

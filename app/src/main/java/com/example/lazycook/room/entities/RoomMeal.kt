@@ -1,6 +1,8 @@
 package com.example.lazycook.room.entities
 
+import android.net.Uri
 import android.util.Log
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Embedded
@@ -32,6 +34,8 @@ data class RoomMeal(
     val startDate: MealDate,
     val endDate: MealDate,
     val mealTimeId: Int,
+    @ColumnInfo(defaultValue = "")
+    val photo: String
 )
 
 data class RoomMealWithMealTime(
@@ -45,7 +49,7 @@ data class RoomMealWithMealTime(
     val mealTime: RoomMealTimeWithTag
 ) {
     fun asMeal() =
-        Meal(meal.id, meal.startDate, meal.endDate, mealTime.asMealTime())
+        Meal(meal.id, meal.startDate, meal.endDate, mealTime.asMealTime(), Uri.parse(meal.photo))
 }
 
 @Dao
@@ -66,7 +70,15 @@ interface MealDao : IngredientDao {
 
     @Transaction
     fun insertMealAndGet(meal: Meal): Meal {
-        val id = insertRoomMeal(RoomMeal(meal.id, meal.startDate, meal.endDate, meal.mealTime.id))
+        val id = insertRoomMeal(
+            RoomMeal(
+                meal.id,
+                meal.startDate,
+                meal.endDate,
+                meal.mealTime.id,
+                photo = meal.photo.toString()
+            )
+        )
         return getMealWithId(id.toInt()).asMeal()
     }
 

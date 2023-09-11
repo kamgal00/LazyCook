@@ -251,22 +251,19 @@ fun CalendarMealTile(
         modifier = modifier.background(Color.Green),
         contentAlignment = Alignment.Center
     ) {
-//        meal.dishes.elements.firstOrNull()?.let {
-//            it.recipe.photo?.let { photo ->
-//                AsyncImage(
-//                    model = photo,
-//                    contentDescription = null,
-//                    contentScale = ContentScale.Crop,
-//                    modifier = Modifier
-//                        .size(60.dp)
-//                        .border(
-//                            width = 1.dp,
-//                            color = Color.LightGray,
-//                        )
-//                        .padding(3.dp)
-//                )
-//            } ?: Text(text = it.recipe.name)
-//        } ?:
-        Icon(imageVector = Icons.Default.Check, contentDescription = null)
+            AsyncImage(
+                model = meal.photo,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(60.dp)
+                    .border(
+                        width = 1.dp,
+                        color = Color.LightGray,
+                    )
+                    .padding(3.dp)
+            )
+//                ?:
+//        Icon(imageVector = Icons.Default.Check, contentDescription = null)
     }
 }

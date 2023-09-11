@@ -1,5 +1,6 @@
 package com.example.lazycook.logic.dataclasses
 
+import android.net.Uri
 import androidx.compose.foundation.InternalFoundationApi
 import androidx.room.Ignore
 import com.example.lazycook.logic.DataObject
@@ -26,6 +27,7 @@ data class Meal(
     val endDate: MealDate,
     @Ignore
     val mealTime: MealTime,
+    val photo: Uri
 ) : DataObject {
     fun asIdWithType() = IdWithType(id, "meal")
 }
