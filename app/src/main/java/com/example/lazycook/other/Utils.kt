@@ -18,6 +18,12 @@ fun Calendar.format(pattern: String? = null): String =
         )
     } ?: DateFormat.getDateInstance().format(time)
 
+fun today(): Date = Calendar.getInstance().apply {
+    set(Calendar.HOUR_OF_DAY, 0)
+    set(Calendar.MINUTE, 0)
+    set(Calendar.SECOND, 0)
+}.time
+
 fun Calendar.addDays(amount: Int): Calendar = this.apply { add(Calendar.DATE, amount) }
 fun Int.formatAsHour(): String = "${this / 60}:${
     (this % 60).toString().padStart(2, '0')

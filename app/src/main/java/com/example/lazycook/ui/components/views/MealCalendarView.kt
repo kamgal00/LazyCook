@@ -119,7 +119,7 @@ fun MealCalendar(
             ) {
                 val calendar = Calendar.getInstance()
                 calendar.time = element.currentDate.date
-                (0 until days).forEach {
+                repeat(days) {
                     calendar.AsCalendarDateTile(Modifier.size(firstColumnWidth, rowHeight))
                     calendar.addDays(1)
                 }
@@ -172,8 +172,8 @@ fun MealCalendar(
                         .size(columnWidth, headerHeight)
 //                        .border(1.dp, color = Color.Black)
                         .clickable { actionConsumer(Create(MealTime(0, 0, null, null))) },
-                   contentAlignment = Center
-                    ) {
+                    contentAlignment = Center
+                ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = null)
                 }
             }
@@ -183,12 +183,14 @@ fun MealCalendar(
                     .verticalScroll(verticalScroll)
             ) {
                 val calendar = Calendar.getInstance()
-                (0 until days).forEach { day ->
-                    calendar.apply {
-                        time = element.currentDate.date
-                        addDays(day)
-                        set(Calendar.HOUR, 12)
-                    }
+                calendar.time = element.currentDate.date
+                calendar.set(Calendar.HOUR_OF_DAY, 12)
+                repeat(days) {
+                    val currentTimeStamp = calendar.time
+                    val currentMidnight = Calendar.getInstance().apply {
+                        time = calendar.time
+                        set(Calendar.HOUR_OF_DAY, 0)
+                    }.time
                     Row(
                         modifier = Modifier
                             .height(rowHeight)
@@ -202,13 +204,13 @@ fun MealCalendar(
                                 contentAlignment = Center
                             ) {
                                 val isSelectedSlot = selectedSlot != null &&
-                                        calendar.time == selectedSlot.date.date &&
+                                        currentMidnight == selectedSlot.date.date &&
                                         mealTime.id == selectedSlot.mealTime.id
                                 mealTimeToMeal[mealTime.id]?.firstOrNull {
-                                    calendar.after(
-                                        it.startDate.toCalendar()
-                                    ) && calendar.before(
-                                        it.endDate.toCalendar()
+                                    currentTimeStamp.after(
+                                        it.startDate.date
+                                    ) && currentTimeStamp.before(
+                                        it.endDate.date
                                     )
                                 }?.let {
                                     CalendarMealTile(
@@ -217,25 +219,25 @@ fun MealCalendar(
                                             .padding(5.dp)
                                             .clickable { actionConsumer(Select(it)) }
                                     )
-                                } ?: calendar.time.let { time ->
-                                    Icon(
-                                        imageVector = Icons.Default.Add,
-                                        contentDescription = null,
-                                        tint = if (isSelectedSlot) Color.Blue else Color.LightGray,
-                                        modifier = Modifier.clickable {
-                                            actionConsumer(
-                                                Select(
-                                                    CalendarSlot(
-                                                        MealDate(time), mealTime
-                                                    )
+                                } ?: Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = null,
+                                    tint = if (isSelectedSlot) Color.Blue else Color.LightGray,
+                                    modifier = Modifier.clickable {
+                                        actionConsumer(
+                                            Select(
+                                                CalendarSlot(
+                                                    MealDate(currentMidnight), mealTime
                                                 )
                                             )
-                                        }
-                                    )
-                                }
+                                        )
+                                    }
+                                )
+
                             }
                         }
                     }
+                    calendar.addDays(1)
                 }
             }
         }
@@ -251,18 +253,18 @@ fun CalendarMealTile(
         modifier = modifier.background(Color.Green),
         contentAlignment = Alignment.Center
     ) {
-            AsyncImage(
-                model = meal.photo,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(60.dp)
-                    .border(
-                        width = 1.dp,
-                        color = Color.LightGray,
-                    )
-                    .padding(3.dp)
-            )
+        AsyncImage(
+            model = meal.photo,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(60.dp)
+                .border(
+                    width = 1.dp,
+                    color = Color.LightGray,
+                )
+                .padding(3.dp)
+        )
 //                ?:
 //        Icon(imageVector = Icons.Default.Check, contentDescription = null)
     }

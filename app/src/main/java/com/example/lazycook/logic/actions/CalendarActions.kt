@@ -17,6 +17,7 @@ import com.example.lazycook.logic.ret
 import com.example.lazycook.other.addDays
 import com.example.lazycook.other.putInList
 import com.example.lazycook.other.toCalendar
+import com.example.lazycook.other.today
 import java.util.Calendar
 
 
@@ -40,12 +41,12 @@ fun ProgramContext.showCalendar(): ActionWithContinuation<Unit> =
             CalendarElement(
                 emptyList(),
                 emptyList(),
-                MealDate(Calendar.getInstance().time)
+                MealDate(today())
             )
         ) {
             databaseInteractions.getList(MealTime::class) databaseThen { mealTimes ->
                 databaseInteractions.getList(Meal::class) databaseThen { meals ->
-                    ret(CalendarElement(mealTimes, meals, MealDate(Calendar.getInstance().time)))
+                    ret(CalendarElement(mealTimes, meals, MealDate(today())))
                 }
             }
         } then { calendar ->
