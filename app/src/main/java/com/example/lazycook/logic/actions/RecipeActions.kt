@@ -1,9 +1,10 @@
 package com.example.lazycook.logic.actions
 
-import android.net.Uri
 import com.example.lazycook.logic.ActionWithContinuation
 import com.example.lazycook.logic.GuiElement
 import com.example.lazycook.logic.algorithms.asMultiplierWithRespectTo
+import com.example.lazycook.logic.algorithms.times
+import com.example.lazycook.logic.algorithms.toIngredientList
 import com.example.lazycook.logic.apis.ExitContext
 import com.example.lazycook.logic.apis.ProgramContext
 import com.example.lazycook.logic.apis.defaultCallCC
@@ -32,6 +33,18 @@ fun ExitContext.fetchFullRecipe(recipe: Recipe): ActionWithContinuation<FullInfo
     databaseInteractions.getRelatedIngredients(recipe.asIdWithType()) databaseThen { ingredientList ->
         databaseInteractions.getRelatedTags(recipe.asIdWithType()) databaseThen { tagList ->
             ret(FullInfoRecipe(recipe, ingredientList, tagList))
+        }
+    }
+
+fun ProgramContext.showRecipeWithMultiplier(
+    recipe: Recipe,
+    amount: Amount
+): ActionWithContinuation<Unit> =
+    defaultCallCC(Unit) {
+        fetchFullRecipe(recipe) then { fullInfoRecipe ->
+            val scaledFullRecipe =
+                fullInfoRecipe.copy(ingredientList = (fullInfoRecipe.ingredientList.asMap() * (amount asMultiplierWithRespectTo recipe.measures)).toIngredientList())
+            userInteractions.show(scaledFullRecipe) checkCases {}
         }
     }
 

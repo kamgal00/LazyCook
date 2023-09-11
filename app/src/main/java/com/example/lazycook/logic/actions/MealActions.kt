@@ -13,6 +13,7 @@ import com.example.lazycook.logic.apis.defaultCallCC
 import com.example.lazycook.logic.apis.whileCallCC
 import com.example.lazycook.logic.dataclasses.AmountList
 import com.example.lazycook.logic.dataclasses.AmountList.Companion.asAmountList
+import com.example.lazycook.logic.dataclasses.Ingredient
 import com.example.lazycook.logic.dataclasses.MealDate
 import com.example.lazycook.logic.dataclasses.MealTime
 import com.example.lazycook.logic.dataclasses.Recipe
@@ -70,6 +71,9 @@ fun ProgramContext.showMeal(meal: Meal): ActionWithContinuation<Unit> =
                 }
                 select(Meal::class) {
                     addBasicIngredientsToSelectedShoppingList(it.asIdWithType()) then { ret(meal) }
+                }
+                select(Ingredient::class) {
+                    showRecipeWithMultiplier(it.recipe, it.amount!!) then { ret(meal) }
                 }
             }
         }

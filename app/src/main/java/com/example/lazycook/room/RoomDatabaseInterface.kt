@@ -185,7 +185,7 @@ class RoomDatabaseInterface(appContext: Context) : DatabaseInteractions {
             db.recipesDao().getAllRecipes()
                 .map { Pair(it, syncGetRelatedTags(it.asIdWithType())) }
                 .filter {
-                    it.first.name.contains(name) && it.second.elements.containsAll(tags.elements)
+                    it.first.name.contains(name, ignoreCase = true) && it.second.elements.containsAll(tags.elements)
                 }
                 .map { Ingredient(it.first, null) }
                 .let { IngredientList(it) })

@@ -69,7 +69,7 @@ private fun Amount.mergeToAmount(next: Amount, amounts: AmountList): Amount = Am
     )
 )
 
-private operator fun Map<Recipe, Amount>.times(x: Double): Map<Recipe, Amount> =
+operator fun Map<Recipe, Amount>.times(x: Double): Map<Recipe, Amount> =
     mapValues { Amount(it.value.unit, it.value.amount * x) }
 
 private fun List<Map<Recipe, Amount>>.combine() =
@@ -79,3 +79,5 @@ private fun List<Map<Recipe, Amount>>.combine() =
 
 fun List<Map<Recipe, Amount>>.toIngredientList(): IngredientList =
     IngredientList(combine().map { Ingredient(it.key, it.value) })
+fun Map<Recipe, Amount>.toIngredientList(): IngredientList = listOf(this).toIngredientList()
+
