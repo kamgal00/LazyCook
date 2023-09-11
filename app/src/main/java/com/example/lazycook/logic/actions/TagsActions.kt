@@ -11,6 +11,7 @@ import com.example.lazycook.logic.apis.ExitContext
 import com.example.lazycook.logic.apis.ProgramContext
 import com.example.lazycook.logic.apis.defaultCallCC
 import com.example.lazycook.logic.apis.whileCallCC
+import com.example.lazycook.logic.dataclasses.IngredientList
 import com.example.lazycook.logic.ret
 import com.example.lazycook.logic.returnables.Delete
 
@@ -81,8 +82,16 @@ fun ProgramContext.showAllTags(): ActionWithContinuation<Unit> =
                 select(Tag::class) {
                     ret(list.toggle(it))
                 }
-                delete(TagList::class) {
-                    databaseInteractions.delete(it) databaseThen { ret(list) }
+                delete(TagList::class) { tagList ->
+                    defaultCallCC(list) {
+                        confirm("Are you sure you want to remove tags ${tagList.elements.joinToString { it.name }}?") then {
+                            if (it) {
+                                databaseInteractions.delete(tagList) databaseThen {
+                                    ret(TagList(emptyList()))
+                                }
+                            } else ret(list)
+                        }
+                    }
                 }
             }
         }

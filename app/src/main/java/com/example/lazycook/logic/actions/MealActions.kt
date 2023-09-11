@@ -66,7 +66,11 @@ fun ProgramContext.showMeal(meal: Meal): ActionWithContinuation<Unit> =
                 }
                 delete {
                     defaultCallCC(meal) {
-                        databaseInteractions.delete(meal) databaseThen { loopScope.exit(meal) }
+                        confirm("Are you sure you want to delete this meal?") then {
+                            if (it) {
+                                databaseInteractions.delete(meal) databaseThen { loopScope.exit(meal) }
+                            } else ret(meal)
+                        }
                     }
                 }
                 select(Meal::class) {

@@ -44,7 +44,14 @@ fun ProgramContext.showRecipeWithMultiplier(
         fetchFullRecipe(recipe) then { fullInfoRecipe ->
             val scaledFullRecipe =
                 fullInfoRecipe.copy(ingredientList = (fullInfoRecipe.ingredientList.asMap() * (amount asMultiplierWithRespectTo recipe.measures)).toIngredientList())
-            userInteractions.show(scaledFullRecipe) checkCases {}
+            userInteractions.show(
+                scaledFullRecipe,
+                additionalOperations = listOf("Go to normal view" to Select(recipe))
+            ) checkCases {
+                select(Recipe::class) {
+                    showRecipe(recipe)
+                }
+            }
         }
     }
 
@@ -130,7 +137,13 @@ fun ProgramContext.showRecipe(recipe: Recipe): ActionWithContinuation<Unit> =
                 }
                 delete {
                     defaultCallCC(recipe) {
-                        databaseInteractions.delete(recipe) databaseThen { loopScope.exit(recipe) }
+                        confirm("Are you sure you want to remove recipe ${recipe.name}?") then {
+                            if (it) {
+                                databaseInteractions.delete(recipe) databaseThen {
+                                    loopScope.exit(recipe)
+                                }
+                            } else ret(recipe)
+                        }
                     }
                 }
                 select(Recipe::class) {

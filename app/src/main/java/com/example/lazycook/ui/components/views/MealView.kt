@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -73,7 +74,8 @@ fun MealView(
                         )
                         Text(
                             text = fullMeal.meal.mealTime.relatedTag?.name.orEmpty(),
-                            fontSize = 30.sp
+                            fontSize = 30.sp,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
@@ -97,13 +99,5 @@ fun MealView(
                 actions = listOf(editOperation(fullMeal.ingredientList, actionConsumer))
             )
         }
-//        Column {
-//            Button(
-//                onClick = { actionConsumer(Delete(fullMeal.meal)) },
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                Text(text = "Delete")
-//            }
-//        }
     }
 }

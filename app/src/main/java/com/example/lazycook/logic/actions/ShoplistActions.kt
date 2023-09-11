@@ -121,8 +121,12 @@ fun ProgramContext.showShoppingList(shoppingList: ShoppingList): ActionWithConti
                 }
                 delete {
                     defaultCallCC(shoppingList) {
-                        databaseInteractions.delete(shoppingList) databaseThen {
-                            loopScope.exit(shoppingList)
+                        confirm("Are you sure you want to delete shopping list ${shoppingList.name}?") then {
+                            if (it) {
+                                databaseInteractions.delete(shoppingList) databaseThen {
+                                    loopScope.exit(shoppingList)
+                                }
+                            } else ret(shoppingList)
                         }
                     }
                 }

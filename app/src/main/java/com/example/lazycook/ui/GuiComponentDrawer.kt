@@ -17,6 +17,7 @@ import com.example.lazycook.logic.actions.AllTagsElement
 import com.example.lazycook.logic.actions.AmountEditor
 import com.example.lazycook.logic.actions.AmountSelector
 import com.example.lazycook.logic.actions.CalendarElement
+import com.example.lazycook.logic.actions.ConfirmationElement
 import com.example.lazycook.logic.actions.DateRangeSelector
 import com.example.lazycook.logic.actions.FullInfoMeal
 import com.example.lazycook.logic.actions.FullInfoRecipe
@@ -33,6 +34,7 @@ import com.example.lazycook.ui.components.views.RecipeView
 import com.example.lazycook.ui.components.views.ShoppingListSelectionView
 import com.example.lazycook.ui.components.views.ShoppingListView
 import com.example.lazycook.ui.components.widgets.ChooseAmountView
+import com.example.lazycook.ui.components.widgets.ConfirmationWindow
 import com.example.lazycook.ui.components.widgets.EnterUnitAndAmount
 import com.example.lazycook.ui.components.widgets.IngredientListWidget
 import com.example.lazycook.ui.components.widgets.ShowMeasures
@@ -47,6 +49,7 @@ fun DrawGuiElement(
     modifier: Modifier = Modifier
 ) {
     when (element) {
+        is ConfirmationElement -> ConfirmationWindow(msg = element, actionConsumer = onAction)
         is AllTagsElement -> AllTagsView(element, onAction)
         is TagSelector -> TagSelectionView(selector = element, actionConsumer = onAction)
         is ShoppingListSelector -> ShoppingListSelectionView(

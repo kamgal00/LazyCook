@@ -40,8 +40,12 @@ fun ProgramContext.showMealTime(mealTime: MealTime): ActionWithContinuation<Unit
             }
             delete {
                 defaultCallCC(mealTime) {
-                    databaseInteractions.delete(mealTime) databaseThen {
-                        loopScope.exit(mealTime)
+                    confirm("Are you sure you want to delete meal time $mealTime?") then {
+                        if (it) {
+                            databaseInteractions.delete(mealTime) databaseThen {
+                                loopScope.exit(mealTime)
+                            }
+                        } else ret(mealTime)
                     }
                 }
             }
